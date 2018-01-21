@@ -44,7 +44,7 @@ before the code tries to reestablish the database connection.
 ===========================  ==================================================
 Hook                         Description
 ===========================  ==================================================
-``add_pre_reconnect_hook``   Installs a hook of the type 
+``add_pre_reconnect_hook``   Installs a hook of the type
                              ``Callable[[BaseDatabaseWrapper], None]`` that
                              will be called before the library tries to
                              reestablish a connection. 12factor-vault uses this
@@ -93,7 +93,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _HAProxy: http://www.haproxy.org/
 .. _tcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#option%20tcpka
-.. _clitcpka: 
+.. _clitcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4-option%20clitcpka
 .. _srvtcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#option%20srvtcpka
