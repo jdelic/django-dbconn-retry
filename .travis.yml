@@ -1,0 +1,14 @@
+language: python
+python:
+    - "3.4"
+    - "3.5"
+    - "3.6"
+sudo: false
+install:
+    - pip install tox
+script:
+    - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then tox -e coverage,coverage-report,coveralls,flake8,doc8,pep257,mypy; fi
+matrix:
+    fast_finish: true
+notifications:
+    email: false
