@@ -1,2 +1,2 @@
-recursive-include django_dbconn_retry/tests *
-recursive-include test_project
+recursive-include django_dbconn_retry/tests *.py
+recursive-include test_project *.py
