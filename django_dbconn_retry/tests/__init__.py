@@ -15,12 +15,12 @@ class ReconnectTests(TestCase):
         cb = Mock()
         ddr.add_pre_reconnect_hook(cb)
         connection.closed = property(lambda: True, lambda: None)
-        self.assertRaises(OperationalError, self.client.get('/'))
+        self.assertRaises(OperationalError, self.client.get, '/')
         cb.assert_called()
 
     def test_posthook(self) -> None:
         cb = Mock()
         ddr.add_post_reconnect_hook(cb)
         connection.closed = property(lambda: True, lambda: None)
-        self.assertRaises(OperationalError, self.client.get('/'))
+        self.assertRaises(OperationalError, self.client.get, '/')
         cb.assert_called()
