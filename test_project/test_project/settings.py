@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'test_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dbconntest',
         'USER': 'dbconntest',
         'PASSWORD': '',
