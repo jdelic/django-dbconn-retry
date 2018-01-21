@@ -38,7 +38,7 @@ Just pull the library in using ``pip install django-dbconn-retry``. Then add
 Provided hooks
 --------------
 The library provides an interface for other code to plug into the process to,
-for example, allow ``12factor-vault``__ to refresh the database credentials
+for example, allow `12factor-vault`_ to refresh the database credentials
 before the code tries to reestablish the database connection.
 
 ===========================  ==================================================
@@ -90,6 +90,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+.. _12factor-vault: https://github.com/jdelic/12factor-vault/
 .. _HAProxy: http://www.haproxy.org/
 .. _tcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#option%20tcpka
