@@ -24,4 +24,3 @@ class ReconnectTests(TestCase):
         connection.closed = property(lambda: True, lambda: None)
         self.assertRaises(OperationalError, self.client.get('/'))
         cb.assert_called()
-
