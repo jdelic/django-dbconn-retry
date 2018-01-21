@@ -11,8 +11,8 @@ Why is this useful?
 -------------------
 I use `HAProxy`_ as a load-balancer in front of my PostgreSQL databases all
 the time, sometimes in addition to ``pgbouncer``. Even though you can mostly
-prevent surprises by enabling TCP keep-alive packets through ``tcpka``__,
-``clitcpka``__ and ``srvtcpka``__, I still encounter situations where the
+prevent surprises by enabling TCP keep-alive packets through ``tcpka``_,
+``clitcpka``_ and ``srvtcpka``_, I still encounter situations where the
 underlying TCP connection has been closed through the load-balancer. Most often
 this results in
 
@@ -22,7 +22,7 @@ this results in
 
 This library patches Django such that it try to reconnect once before failing.
 
-Another application of this is when using `Hashicorp Vault`__, where
+Another application of this is when using `Hashicorp Vault`_, where
 credentials for a database connection can expire at any time and then need to
 be refreshed from Vault.
 
