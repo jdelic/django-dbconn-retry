@@ -52,7 +52,7 @@ def monkeypatch_django() -> None:
     global pre_reconnect_hooks, post_reconnect_hooks
 
     def ensure_connection_with_retries(self: django_db_base.BaseDatabaseWrapper) -> None:
-        if self.connection is not None and self.connection.closed:
+        if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
             _log.debug("failed connection detected")
             self.connection = None
 
