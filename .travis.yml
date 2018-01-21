@@ -11,7 +11,8 @@ sudo: false
 install:
     - pip install tox
 before_script:
-    - psql -c 'create database travis_ci_test;' -U postgres
+    - sudo -u postgres createuser -s -p 5432 dbconntest &>/dev/null
+    - sudo -u postgres createdb -O dbconntest -p 5432 dbconntest
 script:
     - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then tox; fi
 matrix:
