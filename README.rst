@@ -16,6 +16,8 @@ prevent surprises by enabling TCP keep-alive packets through ``tcpka``_,
 underlying TCP connection has been closed through the load-balancer. Most often
 this results in
 
+.. code-block::
+
     django.db.utils.OperationalError: server closed the connection unexpectedly
     This probably means the server terminated abnormally before or while
     processing the request.
