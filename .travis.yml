@@ -13,7 +13,7 @@ install:
 before_script:
     - psql -c 'create database travis_ci_test;' -U postgres
 script:
-    - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then tox -e coverage,coverage-report,coveralls,flake8,doc8,pep257,mypy; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then tox; fi
 matrix:
     fast_finish: true
 notifications:
