@@ -13,7 +13,7 @@ except IOError:
 
 setup(
     name="django-dbconn-retry",
-    version="0.1.0",
+    version="0.1.1",
     packages=["django_dbconn_retry"],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -25,7 +25,7 @@ setup(
     ],
     url="https://github.com/jdelic/django-dbconn-retry/",
     author="Jonas Maurus (@jdelic)",
-    author_email="jonas-12factor-vault@gopythongo.com",
+    author_email="jonas-dbconn-retry@gopythongo.com",
     maintainer="GoPythonGo.com",
     maintainer_email="info@gopythongo.com",
     description="Patch Django to retry a database connection first before failing.",
