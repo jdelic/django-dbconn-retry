@@ -92,5 +92,3 @@ class DjangoIntegration(AppConfig):
 
     def ready(self) -> None:
         monkeypatch_django()
-
-
