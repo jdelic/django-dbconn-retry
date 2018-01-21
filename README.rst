@@ -9,9 +9,9 @@ an ``OperationException``.
 
 Why is this useful?
 -------------------
-I use `HAProxy`__ as a load-balancer in front of my PostgreSQL databases all
-the time, sometimes in addition to `pgbouncer`. Even though you can mostly 
-prevent surprises by enabling TCP keep-alive packets through ``tcpka``__, 
+I use `HAProxy`_ as a load-balancer in front of my PostgreSQL databases all
+the time, sometimes in addition to ``pgbouncer``. Even though you can mostly
+prevent surprises by enabling TCP keep-alive packets through ``tcpka``__,
 ``clitcpka``__ and ``srvtcpka``__, I still encounter situations where the
 underlying TCP connection has been closed through the load-balancer. Most often
 this results in
