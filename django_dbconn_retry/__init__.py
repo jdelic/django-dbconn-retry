@@ -5,7 +5,7 @@ from django.apps.config import AppConfig
 from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
 
-from typing import Union, Tuple, Callable, List
+from typing import Union, Tuple, Callable, List  # noqa. flake8 #247
 
 _log = logging.getLogger(__name__)
 default_app_config = 'django_dbconn_retry.DjangoIntegration'
