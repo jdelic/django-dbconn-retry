@@ -49,8 +49,6 @@ def add_post_reconnect_hook(hook: Callable[[django_db_base.BaseDatabaseWrapper],
 
 
 def monkeypatch_django() -> None:
-    global pre_reconnect_hooks, post_reconnect_hooks
-
     def ensure_connection_with_retries(self: django_db_base.BaseDatabaseWrapper) -> None:
         if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
             _log.debug("failed connection detected")
@@ -64,6 +62,8 @@ def monkeypatch_django() -> None:
                     if isinstance(e, _operror_types):
                         if hasattr(self, "_connection_retries") and self._connection_retries >= 1:
                             _log.error("Reconnecting to the database didn't help %s", str(e))
+                            for hook in post_reconnect_hooks:
+                                hook(self)
                             raise
                         else:
                             _log.info("Database connection failed. Refreshing...")
@@ -83,7 +83,7 @@ def monkeypatch_django() -> None:
                 else:
                     self._connection_retries = 0
 
-    _log.debug("12factor-vault: monkeypatching BaseDatabaseWrapper")
+    _log.debug("django_dbconn_retry: monkeypatching BaseDatabaseWrapper")
     django_db_base.BaseDatabaseWrapper.ensure_connection = ensure_connection_with_retries
 
 

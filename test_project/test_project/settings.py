@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'test_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'dbconntest',
         'USER': 'dbconntest',
         'PASSWORD': '',
@@ -121,3 +121,35 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s %(levelname)s %(message)s",
+        },
+    },
+    "handlers": {
+        "application_logs": {
+            "level": "DEBUG",
+            "formatter": "simple",
+            "class": 'logging.StreamHandler',
+            "stream": 'ext://sys.stderr',
+        },
+        "server_logs": {
+            "level": "INFO",
+            "formatter": "simple",
+            "class": 'logging.StreamHandler',
+            "stream": 'ext://sys.stdout',
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["application_logs"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
