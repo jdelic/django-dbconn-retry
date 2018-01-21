@@ -32,19 +32,22 @@ class ReconnectTests(TestCase):
     def test_getting_root(self) -> None:
         self.client.get('/')
 
-    def setUp(self):
+    def setUp(self) -> None:
         _log.debug("patching for setup")
         self.s_connect = BaseDatabaseWrapper.connect
         BaseDatabaseWrapper.connect = raise_operror
         BaseDatabaseWrapper.connection = property(lambda x: None, lambda x: None)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         _log.debug("restoring")
         BaseDatabaseWrapper.connect = self.s_connect
         del BaseDatabaseWrapper.connection
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
+        # this prevents the database rollback from Django, which we don't need in these tests
+        # but whenever we do... it'll be hard to work around it, because they fail after
+        # BaseDatabaseWrapper has been patched in setUp
         pass
 
     def test_prehook(self) -> None:
