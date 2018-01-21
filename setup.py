@@ -25,7 +25,7 @@ setup(
     ],
     url="https://github.com/jdelic/django-dbconn-retry/",
     author="Jonas Maurus (@jdelic)",
-    author_email="jonas-12factor-vault@gopythongo.com",
+    author_email="jonas-dbconn-retry@gopythongo.com",
     maintainer="GoPythonGo.com",
     maintainer_email="info@gopythongo.com",
     description="Patch Django to retry a database connection first before failing.",
