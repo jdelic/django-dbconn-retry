@@ -1,1 +1,2 @@
 recursive-include django_dbconn_retry/tests *
+recursive-include test_project

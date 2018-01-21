@@ -1,7 +1,6 @@
 coverage==4.4.1
 coveralls==1.2.0
 flake8==3.5.0
-pep257==0.7.0
 doc8==0.8.0
 mypy==0.540
 psycopg2==2.7.3.2
