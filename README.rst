@@ -11,8 +11,8 @@ Why is this useful?
 -------------------
 I use `HAProxy`_ as a load-balancer in front of my PostgreSQL databases all
 the time, sometimes in addition to ``pgbouncer``. Even though you can mostly
-prevent surprises by enabling TCP keep-alive packets through ``tcpka``_,
-``clitcpka``_ and ``srvtcpka``_, I still encounter situations where the
+prevent surprises by enabling TCP keep-alive packets through `tcpka`_,
+`clitcpka`_ and `srvtcpka`_, I still encounter situations where the
 underlying TCP connection has been closed through the load-balancer. Most often
 this results in
 
@@ -38,13 +38,13 @@ Just pull the library in using ``pip install django-dbconn-retry``. Then add
 Provided hooks
 --------------
 The library provides an interface for other code to plug into the process to,
-for example, allow ``12factor-vault``__ to refresh the database credentials
+for example, allow `12factor-vault`_ to refresh the database credentials
 before the code tries to reestablish the database connection.
 
 ===========================  ==================================================
 Hook                         Description
 ===========================  ==================================================
-``add_pre_reconnect_hook``   Installs a hook of the type 
+``add_pre_reconnect_hook``   Installs a hook of the type
                              ``Callable[[BaseDatabaseWrapper], None]`` that
                              will be called before the library tries to
                              reestablish a connection. 12factor-vault uses this
@@ -90,10 +90,11 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+.. _12factor-vault: https://github.com/jdelic/12factor-vault/
 .. _HAProxy: http://www.haproxy.org/
 .. _tcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#option%20tcpka
-.. _clitcpka: 
+.. _clitcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4-option%20clitcpka
 .. _srvtcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#option%20srvtcpka

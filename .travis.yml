@@ -1,0 +1,20 @@
+language: python
+python:
+    - "3.5"
+    - "3.6"
+addons:
+    postgresql: "9.6"
+services:
+    - postgresql
+sudo: false
+install:
+    - pip install tox
+before_script:
+    - sudo -u postgres createuser -s -p 5432 dbconntest &>/dev/null
+    - sudo -u postgres createdb -O dbconntest -p 5432 dbconntest
+script:
+    - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then tox; fi
+matrix:
+    fast_finish: true
+notifications:
+    email: false
