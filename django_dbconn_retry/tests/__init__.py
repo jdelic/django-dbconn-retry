@@ -54,12 +54,12 @@ class ReconnectTests(TestCase):
         cb = Mock(name='pre_reconnect_hook')
         ddr.add_pre_reconnect_hook(cb)
         self.assertRaises(OperationalError, connection.ensure_connection)
-        cb.assert_called()
+        self.assertTrue(cb.called)
         del connection._connection_retries
 
     def test_posthook(self) -> None:
         cb = Mock(name='post_reconnect_hook')
         ddr.add_post_reconnect_hook(cb)
         self.assertRaises(OperationalError, connection.ensure_connection)
-        cb.assert_called()
+        self.assertTrue(cb.called)
         del connection._connection_retries
