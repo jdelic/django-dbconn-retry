@@ -36,7 +36,7 @@ class ReconnectTests(TestCase):
         _log.debug("patching for setup")
         self.s_connect = BaseDatabaseWrapper.connect
         BaseDatabaseWrapper.connect = raise_operror
-        BaseDatabaseWrapper.connection = property(lambda x: None, lambda x: None)
+        BaseDatabaseWrapper.connection = property(lambda x: None, lambda x: None)  # type: ignore
 
     def tearDown(self) -> None:
         _log.debug("restoring")
