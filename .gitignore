@@ -1,6 +1,8 @@
+.coverage
 *.iml
 *.pyc
 *.pyd
 build/
 dist/
+test/
 *.egg-info/
