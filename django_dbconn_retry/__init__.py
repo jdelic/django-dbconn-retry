@@ -77,7 +77,7 @@ def monkeypatch_django() -> None:
                             for hook in post_reconnect_hooks:
                                 hook(self)
                     else:
-                        _log.debug("Database connection failed, but not due to a known error for vault12factor %s",
+                        _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
                                    str(e))
                         raise
                 else:
