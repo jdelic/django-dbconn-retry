@@ -4,14 +4,16 @@ import logging
 from django.apps.config import AppConfig
 from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
+from django.dispatch import Signal
 
 from typing import Union, Tuple, Callable, List  # noqa. flake8 #247
+
 
 _log = logging.getLogger(__name__)
 default_app_config = 'django_dbconn_retry.DjangoIntegration'
 
-pre_reconnect_hooks = []  # type: List[Callable[[django_db_base.BaseDatabaseWrapper], None]]
-post_reconnect_hooks = []  # type: List[Callable[[django_db_base.BaseDatabaseWrapper], None]]
+pre_reconnect = Signal(providing_args=["connection"])
+post_reconnect = Signal(providing_args=["connection"])
 
 
 _operror_types = ()  # type: Union[Tuple[type], Tuple]
@@ -38,16 +40,6 @@ else:
     _operror_types += (MySQLdb.OperationalError,)
 
 
-def add_pre_reconnect_hook(hook: Callable[[django_db_base.BaseDatabaseWrapper], None]) -> None:
-    global pre_reconnect_hooks
-    pre_reconnect_hooks.append(hook)
-
-
-def add_post_reconnect_hook(hook: Callable[[django_db_base.BaseDatabaseWrapper], None]) -> None:
-    global post_reconnect_hooks
-    post_reconnect_hooks.append(hook)
-
-
 def monkeypatch_django() -> None:
     def ensure_connection_with_retries(self: django_db_base.BaseDatabaseWrapper) -> None:
         if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
@@ -62,20 +54,17 @@ def monkeypatch_django() -> None:
                     if isinstance(e, _operror_types):
                         if hasattr(self, "_connection_retries") and self._connection_retries >= 1:
                             _log.error("Reconnecting to the database didn't help %s", str(e))
-                            for hook in post_reconnect_hooks:
-                                hook(self)
+                            post_reconnect.send(self.__class__, connection=self)
                             raise
                         else:
                             _log.info("Database connection failed. Refreshing...")
                             self._connection_retries = 1
 
-                            for hook in pre_reconnect_hooks:
-                                hook(self)
+                            pre_reconnect.send(self.__class__, connection=self)
 
                             self.ensure_connection()
 
-                            for hook in post_reconnect_hooks:
-                                hook(self)
+                            post_reconnect.send(self.__class__, connection=self)
                     else:
                         _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
                                    str(e))

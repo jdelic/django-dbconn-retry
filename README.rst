@@ -35,23 +35,24 @@ Just pull the library in using ``pip install django-dbconn-retry``. Then add
 ``django_dbconn_retry`` to ``INSTALLED_APPS`` in your ``settings.py``.
 
 
-Provided hooks
---------------
+Signals
+-------
 The library provides an interface for other code to plug into the process to,
 for example, allow `12factor-vault`_ to refresh the database credentials
-before the code tries to reestablish the database connection.
+before the code tries to reestablish the database connection. These are
+implemented using `Django Signals`_.
 
 ===========================  ==================================================
-Hook                         Description
+Signal                       Description
 ===========================  ==================================================
-``add_pre_reconnect_hook``   Installs a hook of the type
-                             ``Callable[[BaseDatabaseWrapper], None]`` that
-                             will be called before the library tries to
+``pre_reconnect``            Installs a hook of the type
+                             ``Callable[[type, BaseDatabaseWrapper], None]``
+                             that will be called before the library tries to
                              reestablish a connection. 12factor-vault uses this
                              to refresh the database credentials from Vault.
-``add_post_reconnect_hook``  Installs a hook of the type
-                             ``Callable[[BaseDatabaseWrapper], None]`` that
-                             will be called after the library tried to
+``post_reconnect``           Installs a hook of the type
+                             ``Callable[[type, BaseDatabaseWrapper], None]``
+                             that will be called after the library tried to
                              reestablish the connection. Success or failure has
                              not been tested at this point. So the connection
                              may be in any state.
@@ -91,6 +92,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 .. _12factor-vault: https://github.com/jdelic/12factor-vault/
+.. _Django Signals: https://docs.djangoproject.com/en/dev/topics/signals/
 .. _HAProxy: http://www.haproxy.org/
 .. _tcpka:
    https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#option%20tcpka
