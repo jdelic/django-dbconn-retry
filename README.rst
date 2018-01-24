@@ -1,6 +1,9 @@
 Django Database Connection Autoreconnect
 ========================================
 
+.. image:: https://coveralls.io/repos/github/jdelic/django-dbconn-retry/badge.svg?branch=HEAD
+    :target: https://coveralls.io/github/jdelic/django-dbconn-retry?branch=HEAD
+
 This library monkeypatches ``django.db.backends.base.BaseDatabaseWrapper`` so
 that when a database operation fails because the underlying TCP connection was
 already closed, it first tried to reconnect, instead of immediately raising
