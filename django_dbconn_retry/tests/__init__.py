@@ -4,6 +4,8 @@ import logging
 
 from unittest.mock import Mock
 
+from typing import Any
+
 import django_dbconn_retry as ddr
 
 from django.db.backends.base.base import BaseDatabaseWrapper
@@ -51,7 +53,7 @@ class FullErrorTests(TestCase):
         del connection._connection_retries
 
 
-def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs) -> None:
+def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: Any) -> None:
     dbwrapper.connect = dbwrapper.s_connect
 
 
