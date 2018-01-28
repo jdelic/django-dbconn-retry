@@ -45,6 +45,9 @@ def monkeypatch_django() -> None:
         if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
             _log.debug("failed connection detected")
             self.connection = None
+        elif ((self.connection is not None and hasattr(self.connection, 'closed') and not self.connection.closed) or
+              (self.connection is not None and not hasattr(self.connection, 'closed'))):
+            self.close_if_unusable_or_obsolete()
 
         if self.connection is None:
             with self.wrap_database_errors:

@@ -83,11 +83,11 @@ class ReconnectTests(TestCase):
         ddr.pre_reconnect.connect(cb)
         self.assertTrue(cb.called)
         from django.db import connection
-        self.assertFalse(connection.closed)
+        self.assertTrue(connection.is_usable())
 
     def test_posthook(self) -> None:
         cb = Mock(name='post_reconnect_hook')
         ddr.post_reconnect.connect(cb)
         self.assertTrue(cb.called)
         from django.db import connection
-        self.assertFalse(connection.closed)
+        self.assertTrue(connection.is_usable())
