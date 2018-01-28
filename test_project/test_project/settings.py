@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'dbconntest',
         'USER': 'dbconntest',
         'HOST': 'localhost',
-        'PASSWORD': '',
+        'PASSWORD': 'dbconntest',
     }
 }
 

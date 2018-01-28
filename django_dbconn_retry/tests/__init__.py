@@ -10,17 +10,13 @@ from django.db.backends.base.base import BaseDatabaseWrapper
 
 import django_dbconn_retry as ddr
 
-from django.db import connection, OperationalError
+from django.db import connection, OperationalError, transaction
 from django.test import TestCase
 
 
 logging.basicConfig(stream=sys.stderr)
 logging.getLogger("django_dbconn_retry").setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-
-
-def raise_operror(*args: Any, **kwargs: Any) -> None:
-    raise OperationalError()
 
 
 class FullErrorTests(TestCase):
@@ -35,7 +31,7 @@ class FullErrorTests(TestCase):
     def setUp(self) -> None:
         _log.debug("[FullErrorTests] patching for setup")
         self.s_connect = BaseDatabaseWrapper.connect
-        BaseDatabaseWrapper.connect = raise_operror
+        BaseDatabaseWrapper.connect = Mock(side_effect=OperationalError('fail testing'))
         BaseDatabaseWrapper.connection = property(lambda x: None, lambda x, y: None)  # type: ignore
 
     def tearDown(self) -> None:
@@ -43,13 +39,6 @@ class FullErrorTests(TestCase):
         BaseDatabaseWrapper.connect = self.s_connect
         del BaseDatabaseWrapper.connection
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        # this prevents the database rollback from Django, which we don't need in these tests
-        # but whenever we do... it'll be hard to work around it, because they fail after
-        # BaseDatabaseWrapper has been patched in setUp
-        pass
-
     def test_prehook(self) -> None:
         cb = Mock(name='pre_reconnect_hook')
         ddr.pre_reconnect.connect(cb)
@@ -65,29 +54,44 @@ class FullErrorTests(TestCase):
         del connection._connection_retries
 
 
-class ReconnectTests(TestCase):
-    def test_getting_root(self) -> None:
-        self.client.get('/')
+def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs) -> None:
+    dbwrapper.connect = dbwrapper.s_connect
 
-    def setUp(self) -> None:
-        from django.db import connection
-        _log.debug("[ReconnectTests] closing connection for reconnect test")
-        connection.close()
+
+class ReconnectTests(TestCase):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        return
 
     def test_ensure_closed(self) -> None:
         from django.db import connection
-        self.assertTrue(connection.closed)  # should be true after setUp
+        connection.close()
+        self.assertFalse(connection.is_usable())  # should be true after setUp
 
     def test_prehook(self) -> None:
         cb = Mock(name='pre_reconnect_hook')
+        ddr.pre_reconnect.connect(fix_connection)
         ddr.pre_reconnect.connect(cb)
-        self.assertTrue(cb.called)
         from django.db import connection
+        connection.close()
+        connection.s_connect = connection.connect
+        connection.connect = Mock(side_effect=OperationalError('reconnect testing'))
+        connection.ensure_connection()
+        ReconnectTests.cls_atomics['default'] = transaction.atomic(using='default')
+        ReconnectTests.cls_atomics['default'].__enter__()
+        self.assertTrue(cb.called)
         self.assertTrue(connection.is_usable())
 
     def test_posthook(self) -> None:
         cb = Mock(name='post_reconnect_hook')
+        ddr.pre_reconnect.connect(fix_connection)
         ddr.post_reconnect.connect(cb)
-        self.assertTrue(cb.called)
         from django.db import connection
+        connection.close()
+        connection.s_connect = connection.connect
+        connection.connect = Mock(side_effect=OperationalError('reconnect testing'))
+        connection.ensure_connection()
+        ReconnectTests.cls_atomics['default'] = transaction.atomic(using='default')
+        ReconnectTests.cls_atomics['default'].__enter__()
+        self.assertTrue(cb.called)
         self.assertTrue(connection.is_usable())

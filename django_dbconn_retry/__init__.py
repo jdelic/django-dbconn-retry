@@ -12,8 +12,8 @@ from typing import Union, Tuple, Callable, List  # noqa. flake8 #247
 _log = logging.getLogger(__name__)
 default_app_config = 'django_dbconn_retry.DjangoIntegration'
 
-pre_reconnect = Signal(providing_args=["connection"])
-post_reconnect = Signal(providing_args=["connection"])
+pre_reconnect = Signal(providing_args=["dbwrapper"])
+post_reconnect = Signal(providing_args=["dbwrapper"])
 
 
 _operror_types = ()  # type: Union[Tuple[type], Tuple]
@@ -45,14 +45,6 @@ def monkeypatch_django() -> None:
         if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
             _log.debug("failed connection detected")
             self.connection = None
-        elif ((self.connection is not None and hasattr(self.connection, 'closed') and not self.connection.closed) or
-              (self.connection is not None and not hasattr(self.connection, 'closed'))):
-            if hasattr(self, '_in_testing'):
-                return
-            else:
-                self._in_testing = True
-                self.close_if_unusable_or_obsolete()
-                del self._in_testing
 
         if self.connection is None and not hasattr(self, '_in_connecting'):
             with self.wrap_database_errors:
@@ -63,7 +55,8 @@ def monkeypatch_django() -> None:
                     if isinstance(e, _operror_types):
                         if hasattr(self, "_connection_retries") and self._connection_retries >= 1:
                             _log.error("Reconnecting to the database didn't help %s", str(e))
-                            post_reconnect.send(self.__class__, connection=self)
+                            del self._in_connecting
+                            post_reconnect.send(self.__class__, dbwrapper=self)
                             raise
                         else:
                             _log.info("Database connection failed. Refreshing...")
@@ -74,12 +67,13 @@ def monkeypatch_django() -> None:
                             del self._in_connecting
 
                             # give libraries like 12factor-vault the chance to update the credentials
-                            pre_reconnect.send(self.__class__, connection=self)
+                            pre_reconnect.send(self.__class__, dbwrapper=self)
                             self.ensure_connection()
-                            post_reconnect.send(self.__class__, connection=self)
+                            post_reconnect.send(self.__class__, dbwrapper=self)
                     else:
                         _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
                                    str(e))
+                        del self._in_connecting
                         raise
                 else:
                     # connection successful, reset the flag
