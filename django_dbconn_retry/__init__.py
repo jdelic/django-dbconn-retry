@@ -71,6 +71,7 @@ def monkeypatch_django() -> None:
                             self._connection_retries = 1
                             # ensure that we retry the connection. Sometimes .closed isn't set correctly.
                             self.connection = None
+                            del self._in_connecting
 
                             # give libraries like 12factor-vault the chance to update the credentials
                             pre_reconnect.send(self.__class__, connection=self)
