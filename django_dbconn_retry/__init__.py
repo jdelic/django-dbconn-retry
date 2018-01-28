@@ -54,9 +54,10 @@ def monkeypatch_django() -> None:
                 self.close_if_unusable_or_obsolete()
                 del self._in_testing
 
-        if self.connection is None:
+        if self.connection is None and not hasattr(self, '_in_connecting'):
             with self.wrap_database_errors:
                 try:
+                    self._in_connecting = True
                     self.connect()
                 except Exception as e:
                     if isinstance(e, _operror_types):
@@ -82,6 +83,7 @@ def monkeypatch_django() -> None:
                 else:
                     # connection successful, reset the flag
                     self._connection_retries = 0
+                    del self._in_connecting
 
     _log.debug("django_dbconn_retry: monkeypatching BaseDatabaseWrapper")
     django_db_base.BaseDatabaseWrapper.ensure_connection = ensure_connection_with_retries
