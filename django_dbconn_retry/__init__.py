@@ -58,18 +58,21 @@ def monkeypatch_django() -> None:
                             raise
                         else:
                             _log.info("Database connection failed. Refreshing...")
+                            # mark the retry
                             self._connection_retries = 1
+                            # ensure that we retry the connection. Sometimes .closed isn't set correctly.
+                            self.connection = None
 
+                            # give libraries like 12factor-vault the chance to update the credentials
                             pre_reconnect.send(self.__class__, connection=self)
-
                             self.ensure_connection()
-
                             post_reconnect.send(self.__class__, connection=self)
                     else:
                         _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
                                    str(e))
                         raise
                 else:
+                    # connection successful, reset the flag
                     self._connection_retries = 0
 
     _log.debug("django_dbconn_retry: monkeypatching BaseDatabaseWrapper")
