@@ -23,7 +23,7 @@ def raise_operror(*args: Any, **kwargs: Any) -> None:
     raise OperationalError()
 
 
-class ReconnectTests(TestCase):
+class FullErrorTests(TestCase):
     """
     This is SUPERHACKY. I couldn't find a better way to ensure that the
     database connections reliably fail. If I had been able to think of
@@ -33,13 +33,13 @@ class ReconnectTests(TestCase):
         self.client.get('/')
 
     def setUp(self) -> None:
-        _log.debug("patching for setup")
+        _log.debug("[FullErrorTests] patching for setup")
         self.s_connect = BaseDatabaseWrapper.connect
         BaseDatabaseWrapper.connect = raise_operror
         BaseDatabaseWrapper.connection = property(lambda x: None, lambda x, y: None)  # type: ignore
 
     def tearDown(self) -> None:
-        _log.debug("restoring")
+        _log.debug("[FullErrorTests] restoring")
         BaseDatabaseWrapper.connect = self.s_connect
         del BaseDatabaseWrapper.connection
 
@@ -63,3 +63,31 @@ class ReconnectTests(TestCase):
         self.assertRaises(OperationalError, connection.ensure_connection)
         self.assertTrue(cb.called)
         del connection._connection_retries
+
+
+class ReconnectTests(TestCase):
+    def test_getting_root(self) -> None:
+        self.client.get('/')
+
+    def setUp(self) -> None:
+        from django.db import connection
+        _log.debug("[ReconnectTests] closing connection for reconnect test")
+        connection.close()
+
+    def test_ensure_closed(self) -> None:
+        from django.db import connection
+        self.assertTrue(connection.closed)  # should be true after setUp
+
+    def test_prehook(self) -> None:
+        cb = Mock(name='pre_reconnect_hook')
+        ddr.pre_reconnect.connect(cb)
+        self.assertTrue(cb.called)
+        from django.db import connection
+        self.assertFalse(connection.closed)
+
+    def test_posthook(self) -> None:
+        cb = Mock(name='post_reconnect_hook')
+        ddr.post_reconnect.connect(cb)
+        self.assertTrue(cb.called)
+        from django.db import connection
+        self.assertFalse(connection.closed)
