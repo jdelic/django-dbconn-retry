@@ -13,7 +13,7 @@ except IOError:
 
 setup(
     name="django-dbconn-retry",
-    version="0.1.3",
+    version="0.1.4",
     packages=[
         'django_dbconn_retry',
         'django_dbconn_retry.tests',
