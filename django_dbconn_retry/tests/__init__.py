@@ -1,15 +1,12 @@
 # -* encoding: utf-8 *-
-import logging
-from unittest.mock import Mock
-
 import sys
+import logging
 
-from typing import Any
-
-from django.db.backends.base.base import BaseDatabaseWrapper
+from unittest.mock import Mock
 
 import django_dbconn_retry as ddr
 
+from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db import connection, OperationalError, transaction
 from django.test import TestCase
 
