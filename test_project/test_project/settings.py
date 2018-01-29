@@ -79,7 +79,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dbconntest',
         'USER': 'dbconntest',
-        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PASSWORD': 'dbconntest',
     }
 }
 
