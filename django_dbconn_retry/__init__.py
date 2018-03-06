@@ -6,7 +6,7 @@ from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
 from django.dispatch import Signal
 
-from typing import Union, Tuple, Callable, List  # noqa. flake8 #247
+from typing import Union, Tuple, Callable, List  # noqa. flake8 #118
 
 
 _log = logging.getLogger(__name__)
