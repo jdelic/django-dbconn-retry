@@ -12,8 +12,8 @@ from typing import Union, Tuple, Callable, List  # noqa. flake8 #118
 _log = logging.getLogger(__name__)
 default_app_config = 'django_dbconn_retry.DjangoIntegration'
 
-pre_reconnect = Signal(providing_args=["dbwrapper"])
-post_reconnect = Signal(providing_args=["dbwrapper"])
+pre_reconnect = Signal()
+post_reconnect = Signal()
 
 
 _operror_types = ()  # type: Union[Tuple[type], Tuple]

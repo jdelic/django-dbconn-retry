@@ -64,6 +64,10 @@ Signal                       Description
                              may be in any state.
 ===========================  ==================================================
 
+Both signals send a parameter ``dbwrapper`` which points to the current instance
+of ``django.db.backends.base.BaseDatabaseWrapper`` which allows the signal
+receiver to act on the database connection.
+
 
 License
 =======
