@@ -1,4 +1,5 @@
 # -* encoding: utf-8 *-
+import django
 import logging
 
 from django.apps.config import AppConfig
@@ -10,7 +11,9 @@ from typing import Union, Tuple, Callable, List  # noqa. flake8 #118
 
 
 _log = logging.getLogger(__name__)
-default_app_config = 'django_dbconn_retry.DjangoIntegration'
+
+if django.VERSION < (3, 2):
+    default_app_config = 'django_dbconn_retry.DjangoIntegration'
 
 pre_reconnect = Signal()
 post_reconnect = Signal()
