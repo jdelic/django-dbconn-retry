@@ -1,9 +1,8 @@
 language: python
 python:
-    - "3.5"
-    - "3.6"
+    - "3.10"
 addons:
-    postgresql: "9.6"
+    postgresql: "14"
 services:
     - postgresql
 sudo: false
