@@ -35,7 +35,12 @@ jobs:
         sudo -u postgres createdb -O dbconntest -p 5432 dbconntest
     - name: Run Tests
       run: |
-        python test_project/manage.py test
+        coverage run --source=django_dbconn_retry test_project/manage.py test
+        coverage report -m
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.COVERALLS_TOKEN }}
     - name: Run Flake8
       run:
         flake8 --max-line-length=120 django_dbconn_retry setup.py
