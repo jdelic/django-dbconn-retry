@@ -3,4 +3,4 @@ coveralls==1.2.0
 flake8==3.5.0
 doc8==0.8.0
 mypy==0.540
-psycopg2==2.7.3.2
+psycopg2==2.9.3
