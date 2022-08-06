@@ -31,7 +31,7 @@ jobs:
         pg_isready
     - name: Set up PostgreSQL
       run: |
-        sudo -u postgres createuser -s -p 5432 dbconntest &>/dev/nul
+        sudo -u postgres createuser -s -p 5432 dbconntest
         sudo -u postgres createdb -O dbconntest -p 5432 dbconntest
     - name: Run Tests
       run: |
