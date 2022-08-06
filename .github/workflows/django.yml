@@ -37,10 +37,12 @@ jobs:
       run: |
         coverage run --source=django_dbconn_retry test_project/manage.py test
         coverage report -m
+        coverage lcov
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.COVERALLS_TOKEN }}
+        path-to-lcov: coverage.lcov
     - name: Run Flake8
       run:
         flake8 --max-line-length=120 django_dbconn_retry setup.py
