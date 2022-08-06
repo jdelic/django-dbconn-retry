@@ -27,4 +27,8 @@ jobs:
         pip install -r requirements-test.txt Django
     - name: Run Tests
       run: |
-        python manage.py test
+        python test_project/manage.py test
+        flake8 --max-line-length=120 django_dbconn_retry setup.py
+        mypy --ignore-missing-imports --install-types --non-interactive \
+          --follow-imports=skip --disallow-untyped-calls --disallow-untyped-defs \
+          -p django_dbconn_retry
