@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.10"]
 
     steps:
     - uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
         pg_isready
     - name: Set up PostgreSQL
       run: |
-        sudo -u postgres createuser -s -p 5432 dbconntest
+        sudo -u postgres psql --command="CREATE USER dbconntest PASSWORD 'dbconntest'" --command="\du"
         sudo -u postgres createdb -O dbconntest -p 5432 dbconntest
     - name: Run Tests
       run: |
