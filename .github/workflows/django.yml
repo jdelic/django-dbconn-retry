@@ -25,6 +25,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip wheel
         pip install -r requirements-test.txt Django -e .
+    - name: Start PostgreSQL
+      run: |
+        sudo systemctl start postgresql.service
+        pg_isready
+    - name: Set up PostgreSQL
+      run: |
+        sudo -u postgres createuser -s -p 5432 dbconntest &>/dev/nul
+        sudo -u postgres createdb -O dbconntest -p 5432 dbconntest
     - name: Run Tests
       run: |
         python test_project/manage.py test
