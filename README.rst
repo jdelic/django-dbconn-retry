@@ -1,8 +1,8 @@
 Django Database Connection Autoreconnect
 ========================================
 
-.. image:: https://coveralls.io/repos/github/jdelic/django-dbconn-retry/badge.svg?branch=HEAD
-    :target: https://coveralls.io/github/jdelic/django-dbconn-retry?branch=HEAD
+.. image:: https://coveralls.io/repos/github/jdelic/django-dbconn-retry/badge.svg?branch=master
+    :target: https://coveralls.io/github/jdelic/django-dbconn-retry?branch=master
 
 .. image:: https://github.com/jdelic/django-dbconn-retry/actions/workflows/django.yml/badge.svg
     :target: https://github.com/jdelic/django-dbconn-retry/actions

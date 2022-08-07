@@ -38,7 +38,7 @@ jobs:
         coverage run --source=django_dbconn_retry test_project/manage.py test
         coverage report -m
         coverage lcov
-    - name: Coveralls
+    - name: Run Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.COVERALLS_TOKEN }}
