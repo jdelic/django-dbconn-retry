@@ -46,7 +46,7 @@ def monkeypatch_django() -> None:
             _log.debug("failed connection detected")
             self.connection = None
         elif self.connection is not None and not self.is_usable():
-            _log.error("unusable connection detected")
+            _log.debug("unusable connection detected")
             self.connection = None
 
         if self.connection is None and not hasattr(self, '_in_connecting'):
