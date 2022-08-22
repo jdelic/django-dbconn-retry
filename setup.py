@@ -38,5 +38,17 @@ setup(
     long_description=long_description,
 
     install_requires=[
+        "Django",
     ],
+    extras_require={
+        "test": [
+            "coverage",
+            "flake8",
+            "doc8",
+            "mypy",
+            "psycopg2-binary",
+            "django-stubs",
+            "django-stubs-ext",
+        ],
+    }
 )
