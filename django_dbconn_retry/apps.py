@@ -60,7 +60,10 @@ def monkeypatch_django() -> None:
                         else:
                             _log.info("Database connection failed. Refreshing...")
                             # mark the retry
-                            self._connection_retries = 1
+                            if not hasattr(self, "_connection_retries"):
+                                self._connection_retries = 0
+                                
+                            self._connection_retries += 1
                             # ensure that we retry the connection. Sometimes .closed isn't set correctly.
                             self.connection = None
                             del self._in_connecting
@@ -70,8 +73,7 @@ def monkeypatch_django() -> None:
                             self.ensure_connection()
                             post_reconnect.send(self.__class__, dbwrapper=self)
                     else:
-                        _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
-                                   str(e))
+                        _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s", str(e))
                         del self._in_connecting
                         raise
                 else:
