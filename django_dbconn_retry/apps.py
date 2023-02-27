@@ -4,6 +4,7 @@ from django.apps.config import AppConfig
 from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
 from django.dispatch import Signal
+from django.conf import settings
 
 from typing import Union, Tuple, Callable, List  # noqa. flake8 #118
 
@@ -51,7 +52,7 @@ def monkeypatch_django() -> None:
                     self.connect()
                 except Exception as e:
                     if isinstance(e, _operror_types):
-                        if hasattr(self, "_connection_retries") and self._connection_retries >= 1:
+                        if hasattr(self, "_connection_retries") and self._connection_retries >= getattr(settings, "MAX_DBCONN_RETRIES", 1):
                             _log.error("Reconnecting to the database didn't help %s", str(e))
                             del self._in_connecting
                             post_reconnect.send(self.__class__, dbwrapper=self)
@@ -59,7 +60,10 @@ def monkeypatch_django() -> None:
                         else:
                             _log.info("Database connection failed. Refreshing...")
                             # mark the retry
-                            self._connection_retries = 1
+                            if not hasattr(self, "_connection_retries"):
+                                self._connection_retries = 0
+                                
+                            self._connection_retries += 1
                             # ensure that we retry the connection. Sometimes .closed isn't set correctly.
                             self.connection = None
                             del self._in_connecting
@@ -69,8 +73,7 @@ def monkeypatch_django() -> None:
                             self.ensure_connection()
                             post_reconnect.send(self.__class__, dbwrapper=self)
                     else:
-                        _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
-                                   str(e))
+                        _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s", str(e))
                         del self._in_connecting
                         raise
                 else:
