@@ -1,7 +1,6 @@
 import logging
 
 from django.apps.config import AppConfig
-from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
 from django.dispatch import Signal
 
@@ -15,27 +14,22 @@ pre_reconnect = Signal()
 post_reconnect = Signal()
 
 _operror_types = ()  # type: Union[Tuple[type], Tuple]
-_operror_types += (django_db_utils.OperationalError,)
-try:
-    import psycopg2
-except ImportError:
-    pass
-else:
-    _operror_types += (psycopg2.OperationalError,)
+database_modules = [
+    ("django.db.utils", "OperationalError"),
+    ("psycopg2", "OperationalError"),
+    ("psycopg", "OperationalError"),
+    ("sqlite3", "OperationalError"),
+    ("MySQLdb", "OperationalError"),
+    ("pyodbc", "InterfaceError"),
+]
 
-try:
-    import sqlite3
-except ImportError:
-    pass
-else:
-    _operror_types += (sqlite3.OperationalError,)
-
-try:
-    import MySQLdb
-except ImportError:
-    pass
-else:
-    _operror_types += (MySQLdb.OperationalError,)
+for module_name, error_name in database_modules:
+    try:
+        module = __import__(module_name, fromlist=[error_name])
+        error_type = getattr(module, error_name)
+        _operror_types += (error_type,)
+    except ImportError:
+        pass
 
 
 def monkeypatch_django() -> None:
