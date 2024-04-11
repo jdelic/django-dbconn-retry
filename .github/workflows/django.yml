@@ -49,7 +49,7 @@ jobs:
         flake8 --max-line-length=120 django_dbconn_retry setup.py
   finish:
     needs: build
-    if: $
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
     - name: Close parallel build
