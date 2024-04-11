@@ -1,7 +1,6 @@
 import logging
 
 from django.apps.config import AppConfig
-from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
 from django.dispatch import Signal
 
@@ -16,7 +15,7 @@ post_reconnect = Signal()
 
 _operror_types = ()  # type: Union[Tuple[type], Tuple]
 database_modules = [
-    ("django_db_utils", "OperationalError"),
+    ("django.db.utils", "OperationalError"),
     ("psycopg2", "OperationalError"),
     ("psycopg", "OperationalError"),
     ("sqlite3", "OperationalError"),
