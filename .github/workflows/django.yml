@@ -43,6 +43,16 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: coverage.lcov
+        parallel: true
     - name: Run Flake8
       run:
         flake8 --max-line-length=120 django_dbconn_retry setup.py
+  finish:
+    needs: build
+    if: $
+    runs-on: ubuntu-latest
+    steps:
+    - name: Close parallel build
+      uses: coverallsapp/github-action@master
+      with:
+        parallel-finished: true
