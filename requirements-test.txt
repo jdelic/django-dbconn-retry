@@ -1,7 +1,7 @@
 coverage==7.6.0
 flake8==7.1.0
 doc8==1.1.1
-mypy==1.10.1
+mypy==1.11.1
 psycopg2-binary==2.9.9
 Django==5.0.7
 django-stubs==5.0.2
