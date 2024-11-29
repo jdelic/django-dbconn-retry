@@ -5,4 +5,4 @@ mypy==1.11.2
 psycopg2-binary==2.9.9
 Django==5.1.1
 django-stubs==5.0.4
-django-stubs-ext==5.0.4
+django-stubs-ext==5.1.1
