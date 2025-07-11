@@ -68,8 +68,9 @@ Both signals send a parameter ``dbwrapper`` which points to the current instance
 of ``django.db.backends.base.BaseDatabaseWrapper`` which allows the signal
 receiver to act on the database connection.
 
+
 Settings
--------
+--------
 Here’s a list of settings available in django-dbconn-retry and their default values.
 You can change the value in your ``settings.py``.
 
@@ -79,6 +80,7 @@ Setting                       Description
 ``MAX_DBCONN_RETRY_TIMES``   Default: `1`
                              The max times which django-dbconn-retry will try.
 ===========================  ==================================================
+
 
 License
 =======
