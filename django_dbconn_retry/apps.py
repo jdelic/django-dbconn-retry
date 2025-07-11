@@ -2,7 +2,6 @@ import logging
 
 from django.apps.config import AppConfig
 from django.conf import settings
-from django.db import utils as django_db_utils
 from django.db.backends.base import base as django_db_base
 from django.dispatch import Signal
 
