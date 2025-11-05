@@ -3,6 +3,6 @@ flake8==7.3.0
 doc8==1.1.2
 mypy==1.17.1
 psycopg2-binary==2.9.10
-Django==5.2.4
+Django==5.2.8
 django-stubs==5.2.1
 django-stubs-ext==5.2.1
