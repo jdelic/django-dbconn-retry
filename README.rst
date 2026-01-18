@@ -77,8 +77,16 @@ You can change the value in your ``settings.py``.
 ===========================  ==================================================
 Setting                       Description
 ===========================  ==================================================
-``MAX_DBCONN_RETRY_TIMES``   Default: `1`
+``MAX_DBCONN_RETRY_TIMES``   Default: ``1``
                              The max times which django-dbconn-retry will try.
+``DBCONN_RETRY_DELAY``       Default: ``0``
+                             The initial delay in seconds before the first
+                             retry attempt. Set to ``0`` to retry immediately.
+``DBCONN_RETRY_BACKOFF``     Default: ``1``
+                             The multiplier applied to the delay after each
+                             retry. For example, with ``DBCONN_RETRY_DELAY=1``
+                             and ``DBCONN_RETRY_BACKOFF=2``, the delays will
+                             be 1s, 2s, 4s, etc.
 ===========================  ==================================================
 
 
