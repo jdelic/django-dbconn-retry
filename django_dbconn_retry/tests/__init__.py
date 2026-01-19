@@ -95,6 +95,9 @@ class ReconnectTests(TransactionTestCase):
 
 
 class AtomicBlockTests(TransactionTestCase):
+    """
+    Tests for connection retry behavior inside transaction.atomic() blocks.
+    """
 
     def test_no_retry_when_connection_lost_in_atomic_block(self) -> None:
         from django.db import connection
@@ -108,6 +111,25 @@ class AtomicBlockTests(TransactionTestCase):
 
             with self.assertRaises(ProgrammingError):
                 connection.ensure_connection()
+
+        # After exiting the atomic block, reconnection should work
+        connection.ensure_connection()
+        self.assertTrue(connection.is_usable())
+
+    def test_no_retry_when_connection_closed_in_atomic_block(self) -> None:
+        from django.db import connection
+
+        connection.ensure_connection()
+
+        with transaction.atomic():
+            connection.close()
+
+            with self.assertRaises(ProgrammingError):
+                connection.ensure_connection()
+
+        # After exiting the atomic block, reconnection should work
+        connection.ensure_connection()
+        self.assertTrue(connection.is_usable())
 
     def test_lazy_connection_in_atomic_block_allowed(self) -> None:
         from django.db import connection
