@@ -1,4 +1,5 @@
 import logging
+import time
 
 from django.apps.config import AppConfig
 from django.conf import settings
@@ -36,6 +37,22 @@ for module_name, error_name in database_modules:
 def monkeypatch_django() -> None:
     def ensure_connection_with_retries(self: django_db_base.BaseDatabaseWrapper) -> None:
         self._max_dbconn_retry_times = getattr(settings, "MAX_DBCONN_RETRY_TIMES", 1)
+        self._dbconn_retry_delay = getattr(settings, "DBCONN_RETRY_DELAY", 0)
+        # Validate and normalize retry delay to a non-negative number
+        if not isinstance(self._dbconn_retry_delay, (int, float)) or self._dbconn_retry_delay < 0:
+            _log.warning(
+                "Invalid DBCONN_RETRY_DELAY setting %r; falling back to 0 seconds.",
+                self._dbconn_retry_delay,
+            )
+            self._dbconn_retry_delay = 0
+        self._dbconn_retry_backoff = getattr(settings, "DBCONN_RETRY_BACKOFF", 1)
+        # Validate and normalize backoff factor to a positive number
+        if not isinstance(self._dbconn_retry_backoff, (int, float)) or self._dbconn_retry_backoff <= 0:
+            _log.warning(
+                "Invalid DBCONN_RETRY_BACKOFF setting %r; falling back to 1.",
+                self._dbconn_retry_backoff,
+            )
+            self._dbconn_retry_backoff = 1
 
         if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
             _log.debug("failed connection detected")
@@ -67,6 +84,15 @@ def monkeypatch_django() -> None:
                             # ensure that we retry the connection. Sometimes .closed isn't set correctly.
                             self.connection = None
                             del self._in_connecting
+
+                            # apply delay with backoff before retry
+                            if self._dbconn_retry_delay > 0:
+                                current_delay = self._dbconn_retry_delay * (
+                                    self._dbconn_retry_backoff ** (self._connection_retries - 1)
+                                )
+                                _log.debug("Waiting %.2f seconds before retry attempt %d",
+                                           current_delay, self._connection_retries)
+                                time.sleep(current_delay)
 
                             # give libraries like 12factor-vault the chance to update the credentials
                             pre_reconnect.send(self.__class__, dbwrapper=self)

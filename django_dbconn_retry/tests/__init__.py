@@ -3,7 +3,7 @@ import random
 import sys
 import logging
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from typing import Any
 
@@ -98,3 +98,54 @@ class ReconnectTests(TestCase):
         ddr.pre_reconnect.connect(fix_connection)
         ddr.post_reconnect.connect(cb)
         self.do_assert(cb)
+
+
+class DelayBackoffTests(TestCase):
+    """
+    Tests for the delay and backoff retry functionality.
+    """
+
+    def setUp(self) -> None:
+        _log.debug("[DelayBackoffTests] patching for setup")
+        self.s_connect = BaseDatabaseWrapper.connect
+        BaseDatabaseWrapper.connect = Mock(side_effect=OperationalError('backoff testing'))
+        BaseDatabaseWrapper.connection = property(lambda x: None, lambda x, y: None)  # type: ignore
+
+    def tearDown(self) -> None:
+        _log.debug("[DelayBackoffTests] restoring")
+        BaseDatabaseWrapper.connect = self.s_connect
+        del BaseDatabaseWrapper.connection
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=3, DBCONN_RETRY_DELAY=1.0, DBCONN_RETRY_BACKOFF=2.0)
+    @patch('django_dbconn_retry.apps.time.sleep')
+    def test_delay_with_backoff(self, mock_sleep: Mock) -> None:
+        """Test that delay increases with backoff multiplier."""
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        # With 3 retries, delay=1.0, backoff=2.0:
+        # retry 1: 1.0 * 2.0^0 = 1.0
+        # retry 2: 1.0 * 2.0^1 = 2.0
+        # retry 3: 1.0 * 2.0^2 = 4.0
+        self.assertEqual(mock_sleep.call_count, 3)
+        expected_delays = [1.0, 2.0, 4.0]
+        for i, call in enumerate(mock_sleep.call_args_list):
+            self.assertEqual(call[0][0], expected_delays[i])
+        del connection._connection_retries
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=3)
+    @patch('django_dbconn_retry.apps.time.sleep')
+    def test_no_delay_by_default(self, mock_sleep: Mock) -> None:
+        """Test that sleep is not called with default settings (delay=0)."""
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        mock_sleep.assert_not_called()
+        del connection._connection_retries
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=3, DBCONN_RETRY_DELAY=1.0)
+    @patch('django_dbconn_retry.apps.time.sleep')
+    def test_constant_delay_by_default(self, mock_sleep: Mock) -> None:
+        """Test that delay stays constant with default backoff (backoff=1)."""
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        # With default backoff=1, all delays should be equal to the base delay
+        self.assertEqual(mock_sleep.call_count, 3)
+        for call in mock_sleep.call_args_list:
+            self.assertEqual(call[0][0], 1.0)
+        del connection._connection_retries
