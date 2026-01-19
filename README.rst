@@ -96,8 +96,7 @@ Setting                       Description
                              ``DBCONN_RETRY_BACKOFF=3`` and
                              ``MAX_DBCONN_RETRY_TIMES=10``, the final retry
                              would wait on the order of tens of hours.
-                             Choose these settings carefully or implement an
-                             additional maximum delay cap if very long waits
+                             Choose these settings carefully if very long waits
                              are not acceptable for your deployment.
 ===========================  ==================================================
 
