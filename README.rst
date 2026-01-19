@@ -80,13 +80,25 @@ Setting                       Description
 ``MAX_DBCONN_RETRY_TIMES``   Default: ``1``
                              The max times which django-dbconn-retry will try.
 ``DBCONN_RETRY_DELAY``       Default: ``0``
-                             The initial delay in seconds before the first
-                             retry attempt. Set to ``0`` to retry immediately.
+                             The base delay in seconds before each retry
+                             attempt. Used as the initial delay and, together
+                             with ``DBCONN_RETRY_BACKOFF``, controls the delay
+                             for subsequent retries. Set to ``0`` to retry
+                             immediately.
 ``DBCONN_RETRY_BACKOFF``     Default: ``1``
                              The multiplier applied to the delay after each
                              retry. For example, with ``DBCONN_RETRY_DELAY=1``
                              and ``DBCONN_RETRY_BACKOFF=2``, the delays will
-                             be 1s, 2s, 4s, etc.
+                             be 1s, 2s, 4s, etc. Note that delays grow
+                             exponentially and can become very large for
+                             higher values. For example, with
+                             ``DBCONN_RETRY_DELAY=10``,
+                             ``DBCONN_RETRY_BACKOFF=3`` and
+                             ``MAX_DBCONN_RETRY_TIMES=10``, the final retry
+                             would wait on the order of tens of hours.
+                             Choose these settings carefully or implement an
+                             additional maximum delay cap if very long waits
+                             are not acceptable for your deployment.
 ===========================  ==================================================
 
 
