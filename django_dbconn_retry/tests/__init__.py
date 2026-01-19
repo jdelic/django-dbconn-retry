@@ -10,8 +10,8 @@ from typing import Any
 import django_dbconn_retry as ddr
 
 from django.db.backends.base.base import BaseDatabaseWrapper
-from django.db import connection, OperationalError, transaction
-from django.test import TestCase, override_settings
+from django.db import connection, OperationalError, ProgrammingError, transaction
+from django.test import TestCase, TransactionTestCase, override_settings
 
 
 logging.basicConfig(stream=sys.stderr)
@@ -64,11 +64,7 @@ def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: An
     dbwrapper.connect = dbwrapper.s_connect
 
 
-class ReconnectTests(TestCase):
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        return
+class ReconnectTests(TransactionTestCase):
 
     def test_ensure_closed(self) -> None:
         from django.db import connection
@@ -81,8 +77,6 @@ class ReconnectTests(TestCase):
         connection.s_connect = connection.connect
         connection.connect = Mock(side_effect=OperationalError('reconnect testing'))
         connection.ensure_connection()
-        ReconnectTests.cls_atomics['default'] = transaction.atomic(using='default')
-        ReconnectTests.cls_atomics['default'].__enter__()
         self.assertTrue(cb.called)
         self.assertTrue(connection.is_usable())
         self.assertEqual(connection._connection_retries, 0)
@@ -98,3 +92,28 @@ class ReconnectTests(TestCase):
         ddr.pre_reconnect.connect(fix_connection)
         ddr.post_reconnect.connect(cb)
         self.do_assert(cb)
+
+
+class AtomicBlockTests(TransactionTestCase):
+
+    def test_no_retry_when_connection_lost_in_atomic_block(self) -> None:
+        from django.db import connection
+
+        connection.ensure_connection()
+
+        with transaction.atomic():
+            mock_conn = Mock()
+            mock_conn.closed = True
+            connection.connection = mock_conn
+
+            with self.assertRaises(ProgrammingError):
+                connection.ensure_connection()
+
+    def test_lazy_connection_in_atomic_block_allowed(self) -> None:
+        from django.db import connection
+
+        connection.close()
+
+        with transaction.atomic():
+            connection.ensure_connection()
+            self.assertTrue(connection.is_usable())
