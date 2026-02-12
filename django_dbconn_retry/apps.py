@@ -3,6 +3,7 @@ import logging
 from django.apps.config import AppConfig
 from django.conf import settings
 from django.db.backends.base import base as django_db_base
+from django.db.utils import ProgrammingError
 from django.dispatch import Signal
 
 from typing import Union, Tuple, Callable, List  # noqa. flake8 #118
@@ -39,9 +40,13 @@ def monkeypatch_django() -> None:
 
         if self.connection is not None and hasattr(self.connection, 'closed') and self.connection.closed:
             _log.debug("failed connection detected")
+            if self.in_atomic_block:
+                self.closed_in_transaction = True
             self.connection = None
 
         if self.connection is None and not hasattr(self, '_in_connecting'):
+            if self.in_atomic_block and self.closed_in_transaction:
+                raise ProgrammingError("Cannot reconnect to the database in an atomic block.")
             with self.wrap_database_errors:
                 try:
                     self._in_connecting = True
