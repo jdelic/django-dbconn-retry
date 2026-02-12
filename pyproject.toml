@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-dbconn-retry"
+version = "0.2.0"
+description = "Patch Django to retry a database connection first before failing."
+readme = { file = "README.rst", content-type = "text/x-rst" }
+authors = [
+  { name = "Jonas Maurus (@jdelic)", email = "jonas-dbconn-retry@gopythongo.com" },
+]
+maintainers = [
+  { name = "GoPythonGo.com", email = "info@gopythongo.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: POSIX",
+]
+urls = { Homepage = "https://github.com/jdelic/django-dbconn-retry/" }
+dependencies = []
+
+[tool.setuptools]
+packages = ["django_dbconn_retry", "django_dbconn_retry.tests"]
