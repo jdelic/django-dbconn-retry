@@ -82,6 +82,13 @@ Setting                       Description
                              The max times which django-dbconn-retry will try.
 ===========================  ==================================================
 
+Contributors
+------------
+Many thanks to people who have contributed to this library:
+
+* durant (`@zhangzhw8 <https://github.com/zhangzhw8>`__)
+* Shawn Zivontsis (`@shawnz <https://github.com/shawnz>`__)
+
 
 License
 =======
