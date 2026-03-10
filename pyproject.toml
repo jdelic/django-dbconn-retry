@@ -25,4 +25,4 @@ urls = { Homepage = "https://github.com/jdelic/django-dbconn-retry/" }
 dependencies = []
 
 [tool.setuptools]
-packages = ["django_dbconn_retry", "django_dbconn_retry.tests"]
+packages = ["django_dbconn_retry"]
