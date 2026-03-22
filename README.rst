@@ -9,7 +9,7 @@ Django Database Connection Autoreconnect
 
 This library monkeypatches ``django.db.backends.base.BaseDatabaseWrapper`` so
 that when a database operation fails because the underlying TCP connection was
-already closed, it first tried to reconnect, instead of immediately raising
+already closed, it first tries to reconnect, instead of immediately raising
 an ``OperationException``.
 
 
@@ -28,7 +28,8 @@ this results in
     This probably means the server terminated abnormally before or while
     processing the request.
 
-This library patches Django such that it try to reconnect once before failing.
+This library patches Django such that it will try to reconnect once before
+failing.
 
 Another application of this is when using `Hashicorp Vault`_, where
 credentials for a database connection can expire at any time and then need to
@@ -99,6 +100,13 @@ Setting                       Description
                              Choose these settings carefully if very long waits
                              are not acceptable for your deployment.
 ===========================  ==================================================
+
+Contributors
+------------
+Many thanks to people who have contributed to this library:
+
+* durant (`@zhangzhw8 <https://github.com/zhangzhw8>`__)
+* Shawn Zivontsis (`@shawnz <https://github.com/shawnz>`__)
 
 
 License
