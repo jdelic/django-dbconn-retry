@@ -59,6 +59,12 @@ class FullErrorTests(TestCase):
         ddr.post_reconnect.connect(cb)
         self.do_assert(cb)
 
+    @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
+    def test_non_operational_error_propagates(self) -> None:
+        BaseDatabaseWrapper.connect = Mock(side_effect=ValueError('not a db error'))
+        self.assertRaises(ValueError, connection.ensure_connection)
+        BaseDatabaseWrapper.connect.assert_called_once()
+
 
 def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: Any) -> None:
     dbwrapper.connect = dbwrapper.s_connect
