@@ -80,6 +80,7 @@ Setting                       Description
 ===========================  ==================================================
 ``MAX_DBCONN_RETRY_TIMES``   Default: ``1``
                              The max times which django-dbconn-retry will try.
+                             Set to ``0`` to disable retries entirely.
 ``DBCONN_RETRY_DELAY``       Default: ``0``
                              The base delay in seconds before each retry
                              attempt. Used as the initial delay and, together

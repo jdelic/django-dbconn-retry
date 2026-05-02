@@ -38,6 +38,13 @@ for module_name, error_name in database_modules:
 def monkeypatch_django() -> None:
     def ensure_connection_with_retries(self: django_db_base.BaseDatabaseWrapper) -> None:
         self._max_dbconn_retry_times = getattr(settings, "MAX_DBCONN_RETRY_TIMES", 1)
+        # Validate and normalize max retry times to a non-negative integer
+        if not isinstance(self._max_dbconn_retry_times, int) or self._max_dbconn_retry_times < 0:
+            _log.warning(
+                "Invalid MAX_DBCONN_RETRY_TIMES setting %r; falling back to 1.",
+                self._max_dbconn_retry_times,
+            )
+            self._max_dbconn_retry_times = 1
         self._dbconn_retry_delay = getattr(settings, "DBCONN_RETRY_DELAY", 0)
         # Validate and normalize retry delay to a non-negative number
         if not isinstance(self._dbconn_retry_delay, (int, float)) or self._dbconn_retry_delay < 0:
@@ -70,7 +77,11 @@ def monkeypatch_django() -> None:
                     self.connect()
                 except Exception as e:
                     if isinstance(e, _operror_types):
-                        if (
+                        if self._max_dbconn_retry_times == 0:
+                            _log.info("Not reconnecting; MAX_DBCONN_RETRY_TIMES=0.")
+                            del self._in_connecting
+                            raise
+                        elif (
                                 hasattr(self, "_connection_retries") and
                                 self._connection_retries >= self._max_dbconn_retry_times
                         ):

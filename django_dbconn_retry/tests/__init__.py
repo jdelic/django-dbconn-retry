@@ -169,6 +169,40 @@ class DelayBackoffTests(TestCase):
         del connection._connection_retries
 
 
+class MaxRetriesTests(TestCase):
+    """
+    Tests for MAX_DBCONN_RETRY_TIMES validation and the zero-retries case.
+    """
+
+    def setUp(self) -> None:
+        _log.debug("[MaxRetriesTests] patching for setup")
+        self.s_connect = BaseDatabaseWrapper.connect
+        BaseDatabaseWrapper.connect = Mock(side_effect=OperationalError('max retries testing'))
+        BaseDatabaseWrapper.connection = property(lambda x: None, lambda x, y: None)  # type: ignore
+
+    def tearDown(self) -> None:
+        _log.debug("[MaxRetriesTests] restoring")
+        BaseDatabaseWrapper.connect = self.s_connect
+        del BaseDatabaseWrapper.connection
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=0)
+    def test_zero_disables_retries(self) -> None:
+        pre_cb = Mock(name='pre_reconnect_hook')
+        post_cb = Mock(name='post_reconnect_hook')
+        ddr.pre_reconnect.connect(pre_cb)
+        ddr.post_reconnect.connect(post_cb)
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        BaseDatabaseWrapper.connect.assert_called_once()
+        self.assertFalse(pre_cb.called)
+        self.assertFalse(post_cb.called)
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES="invalid")
+    def test_invalid_max_retry_times(self) -> None:
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        self.assertEqual(connection._connection_retries, 1)
+        del connection._connection_retries
+
+
 class AtomicBlockTests(TransactionTestCase):
     """
     Tests for connection retry behavior inside transaction.atomic() blocks.
