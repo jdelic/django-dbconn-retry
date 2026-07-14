@@ -117,13 +117,11 @@ def monkeypatch_django() -> None:
                         _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
                                    str(e))
                         raise
-                else:
-                    # connection successful, reset the retry counter
-                    self._connection_retries = 0
                 finally:
-                    # always clear the flag
+                    # always clear the flag and reset the counter
                     if hasattr(self, '_in_connecting'):
                         del self._in_connecting
+                    self._connection_retries = 0
 
     _log.debug("django_dbconn_retry: monkeypatching BaseDatabaseWrapper")
     django_db_base.BaseDatabaseWrapper.ensure_connection = ensure_connection_with_retries
