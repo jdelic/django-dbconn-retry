@@ -65,6 +65,12 @@ class FullErrorTests(TestCase):
         self.assertRaises(ValueError, connection.ensure_connection)
         BaseDatabaseWrapper.connect.assert_called_once()
 
+    @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
+    def test_base_exception_clears_in_connecting(self) -> None:
+        BaseDatabaseWrapper.connect = Mock(side_effect=KeyboardInterrupt())
+        self.assertRaises(KeyboardInterrupt, connection.ensure_connection)
+        self.assertFalse(hasattr(connection, '_in_connecting'))
+
 
 def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: Any) -> None:
     dbwrapper.connect = dbwrapper.s_connect
