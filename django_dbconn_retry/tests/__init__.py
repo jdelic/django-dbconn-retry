@@ -19,6 +19,10 @@ logging.getLogger("django_dbconn_retry").setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
+class MockBaseException(BaseException):
+    pass
+
+
 class FullErrorTests(TestCase):
     """
     This is SUPERHACKY. I couldn't find a better way to ensure that the
@@ -44,7 +48,7 @@ class FullErrorTests(TestCase):
     def do_assert(self, cb):
         self.assertRaises(OperationalError, connection.ensure_connection)
         self.assertTrue(cb.called)
-        self.assertEqual(connection._connection_retries, self.max_dbconn_retry_times)
+        self.assertEqual(BaseDatabaseWrapper.connect.call_count, self.max_dbconn_retry_times + 1)
         del connection._connection_retries
 
     @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
@@ -64,6 +68,29 @@ class FullErrorTests(TestCase):
         BaseDatabaseWrapper.connect = Mock(side_effect=ValueError('not a db error'))
         self.assertRaises(ValueError, connection.ensure_connection)
         BaseDatabaseWrapper.connect.assert_called_once()
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
+    def test_base_exception_clears_in_connecting(self) -> None:
+        BaseDatabaseWrapper.connect = Mock(side_effect=MockBaseException())
+        self.assertRaises(MockBaseException, connection.ensure_connection)
+        self.assertFalse(hasattr(connection, '_in_connecting'))
+        del connection._connection_retries
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
+    def test_base_exception_resets_retries(self) -> None:
+        BaseDatabaseWrapper.connect = Mock(side_effect=[OperationalError('down'), MockBaseException()])
+        self.assertRaises(MockBaseException, connection.ensure_connection)
+        self.assertEqual(connection._connection_retries, 0)
+        del connection._connection_retries
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
+    def test_retries_reset_after_exhaustion(self) -> None:
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        self.assertEqual(connection._connection_retries, 0)
+        BaseDatabaseWrapper.connect.reset_mock()
+        self.assertRaises(OperationalError, connection.ensure_connection)
+        self.assertEqual(BaseDatabaseWrapper.connect.call_count, self.max_dbconn_retry_times + 1)
+        del connection._connection_retries
 
 
 def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: Any) -> None:
@@ -137,7 +164,7 @@ class DelayBackoffTests(TestCase):
         """Test that sleep is not called with default settings (delay=0)."""
         self.assertRaises(OperationalError, connection.ensure_connection)
         mock_sleep.assert_not_called()
-        self.assertEqual(connection._connection_retries, 3)
+        self.assertEqual(BaseDatabaseWrapper.connect.call_count, 4)
         del connection._connection_retries
 
     @override_settings(MAX_DBCONN_RETRY_TIMES=3, DBCONN_RETRY_DELAY=1.0)
@@ -157,7 +184,7 @@ class DelayBackoffTests(TestCase):
         """Test that an invalid delay defaults to zero"""
         self.assertRaises(OperationalError, connection.ensure_connection)
         mock_sleep.assert_not_called()
-        self.assertEqual(connection._connection_retries, 1)
+        self.assertEqual(BaseDatabaseWrapper.connect.call_count, 2)
         del connection._connection_retries
 
     @override_settings(
@@ -205,7 +232,7 @@ class MaxRetriesTests(TestCase):
     @override_settings(MAX_DBCONN_RETRY_TIMES="invalid")
     def test_invalid_max_retry_times(self) -> None:
         self.assertRaises(OperationalError, connection.ensure_connection)
-        self.assertEqual(connection._connection_retries, 1)
+        self.assertEqual(BaseDatabaseWrapper.connect.call_count, 2)
         del connection._connection_retries
 
 

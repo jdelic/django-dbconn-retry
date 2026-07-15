@@ -79,7 +79,6 @@ def monkeypatch_django() -> None:
                     if isinstance(e, _operror_types):
                         if self._max_dbconn_retry_times == 0:
                             _log.info("Not reconnecting; MAX_DBCONN_RETRY_TIMES=0.")
-                            del self._in_connecting
                             raise
                         elif (
                                 hasattr(self, "_connection_retries") and
@@ -117,12 +116,12 @@ def monkeypatch_django() -> None:
                     else:
                         _log.debug("Database connection failed, but not due to a known error for dbconn_retry %s",
                                    str(e))
-                        del self._in_connecting
                         raise
-                else:
-                    # connection successful, reset the flag
+                finally:
+                    # always clear the flag and reset the counter
+                    if hasattr(self, '_in_connecting'):
+                        del self._in_connecting
                     self._connection_retries = 0
-                    del self._in_connecting
 
     _log.debug("django_dbconn_retry: monkeypatching BaseDatabaseWrapper")
     django_db_base.BaseDatabaseWrapper.ensure_connection = ensure_connection_with_retries
