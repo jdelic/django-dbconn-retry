@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-dbconn-retry"
-version = "0.2.0"
+version = "0.3.1"
 description = "Patch Django to retry a database connection first before failing."
 readme = { file = "README.rst", content-type = "text/x-rst" }
 authors = [
