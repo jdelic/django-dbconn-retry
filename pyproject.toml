@@ -20,12 +20,12 @@ classifiers = [
   "Intended Audience :: Developers",
   "Intended Audience :: System Administrators",
   "Programming Language :: Python :: 3 :: Only",
-  "License :: OSI Approved :: BSD License",
   "Operating System :: POSIX",
 ]
 
 [tool.setuptools]
 include-package-data = true
+license-files = []
 
 [tool.setuptools.packages.find]
 include = ["django_dbconn_retry*"]
