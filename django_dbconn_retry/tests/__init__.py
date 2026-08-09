@@ -19,6 +19,10 @@ logging.getLogger("django_dbconn_retry").setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
+class MockBaseException(BaseException):
+    pass
+
+
 class FullErrorTests(TestCase):
     """
     This is SUPERHACKY. I couldn't find a better way to ensure that the
@@ -64,6 +68,12 @@ class FullErrorTests(TestCase):
         BaseDatabaseWrapper.connect = Mock(side_effect=ValueError('not a db error'))
         self.assertRaises(ValueError, connection.ensure_connection)
         BaseDatabaseWrapper.connect.assert_called_once()
+
+    @override_settings(MAX_DBCONN_RETRY_TIMES=max_dbconn_retry_times)
+    def test_base_exception_clears_in_connecting(self) -> None:
+        BaseDatabaseWrapper.connect = Mock(side_effect=MockBaseException())
+        self.assertRaises(MockBaseException, connection.ensure_connection)
+        self.assertFalse(hasattr(connection, '_in_connecting'))
 
 
 def fix_connection(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: Any) -> None:
