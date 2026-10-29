@@ -57,6 +57,11 @@ Signal                       Description
                              that will be called before the library tries to
                              reestablish a connection. 12factor-vault uses this
                              to refresh the database credentials from Vault.
+                             Once ``MAX_DBCONN_RETRY_TIMES`` is exhausted, the
+                             library makes only a single connection attempt
+                             per request until one succeeds. It still calls
+                             this hook before each of those attempts so that
+                             they can use refreshed credentials.
 ``post_reconnect``           Installs a hook of the type
                              ``Callable[[type, BaseDatabaseWrapper], None]``
                              that will be called after the library tried to
