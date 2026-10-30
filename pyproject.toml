@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,6 +7,8 @@ name = "django-dbconn-retry"
 version = "0.3.1"
 description = "Patch Django to retry a database connection first before failing."
 readme = { file = "README.rst", content-type = "text/x-rst" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [
   { name = "Jonas Maurus (@jdelic)", email = "jonas-dbconn-retry@gopythongo.com" },
 ]
@@ -18,7 +20,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "Intended Audience :: System Administrators",
   "Programming Language :: Python :: 3 :: Only",
-  "License :: OSI Approved :: BSD License",
   "Operating System :: POSIX",
 ]
 urls = { Homepage = "https://github.com/jdelic/django-dbconn-retry/" }
@@ -26,3 +27,5 @@ dependencies = []
 
 [tool.setuptools]
 packages = ["django_dbconn_retry"]
+# MANIFEST.in adds the tests to the sdist, keep them out of the wheel
+include-package-data = false
