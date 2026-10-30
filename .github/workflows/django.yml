@@ -46,7 +46,7 @@ jobs:
         parallel: true
     - name: Run Flake8
       run:
-        flake8 --max-line-length=120 django_dbconn_retry setup.py
+        flake8 --max-line-length=120 django_dbconn_retry
   finish:
     needs: build
     if: ${{ always() }}
