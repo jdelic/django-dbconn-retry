@@ -16,9 +16,9 @@ jobs:
         python-version: ["3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
@@ -39,10 +39,10 @@ jobs:
         coverage report -m
         coverage lcov
     - name: Run Coveralls
-      uses: coverallsapp/github-action@main
+      uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage.lcov
+        file: coverage.lcov
         parallel: true
     - name: Run Flake8
       run:
@@ -53,6 +53,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Close parallel build
-      uses: coverallsapp/github-action@master
+      uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
