@@ -99,6 +99,54 @@ class ReconnectTests(TransactionTestCase):
         ddr.post_reconnect.connect(cb)
         self.do_assert(cb)
 
+    @override_settings(MAX_DBCONN_RETRY_TIMES=1)
+    def test_prehook_after_exhausted_retries(self) -> None:
+        """
+        Once retries are exhausted, connection attempts fail fast, but pre_reconnect must still be sent before
+        each attempt so that hooks can refresh expired credentials and a later attempt can succeed.
+        """
+        from django.db import connection
+        credentials_rotated = False
+        hook_calls = 0
+
+        def rotate_credentials(sender: type, *, dbwrapper: BaseDatabaseWrapper, **kwargs: Any) -> None:
+            nonlocal hook_calls
+            hook_calls += 1
+            # only fix the connection once new credentials are available
+            if credentials_rotated:
+                fix_connection(sender, dbwrapper=dbwrapper)
+
+        # other tests leave fix_connection connected, which would fix the connection during the first retries
+        ddr.pre_reconnect.disconnect(fix_connection)
+        connection._dbconn_failing_fast = False
+        connection.close()
+        connection.s_connect = connection.connect
+        failing_connect = Mock(side_effect=OperationalError('expired credentials'))
+        connection.connect = failing_connect
+        ddr.pre_reconnect.connect(rotate_credentials)
+        try:
+            self.assertRaises(OperationalError, connection.ensure_connection)
+            self.assertEqual(failing_connect.call_count, 2)
+            self.assertEqual(hook_calls, 1)
+            self.assertEqual(connection._connection_retries, 1)
+
+            # retries are exhausted, so this fails fast after a single attempt, but sends pre_reconnect first
+            self.assertRaises(OperationalError, connection.ensure_connection)
+            self.assertEqual(failing_connect.call_count, 3)
+            self.assertEqual(hook_calls, 2)
+
+            # the hook rotates the credentials before the single attempt, so it succeeds
+            credentials_rotated = True
+            connection.ensure_connection()
+            self.assertEqual(failing_connect.call_count, 3)
+            self.assertEqual(hook_calls, 3)
+            self.assertTrue(connection.is_usable())
+            self.assertEqual(connection._connection_retries, 0)
+            self.assertFalse(connection._dbconn_failing_fast)
+        finally:
+            ddr.pre_reconnect.disconnect(rotate_credentials)
+            connection.connect = connection.s_connect
+
 
 class DelayBackoffTests(TestCase):
     """

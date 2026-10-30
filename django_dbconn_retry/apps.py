@@ -74,6 +74,11 @@ def monkeypatch_django() -> None:
             with self.wrap_database_errors:
                 try:
                     self._in_connecting = True
+                    if self._max_dbconn_retry_times > 0 and getattr(self, "_dbconn_failing_fast", False):
+                        # Retries have been exhausted before, so we only make a single attempt until one succeeds.
+                        # Still give libraries like 12factor-vault the chance to update the credentials first,
+                        # otherwise no attempt could ever succeed once they have expired.
+                        pre_reconnect.send(self.__class__, dbwrapper=self)
                     self.connect()
                 except Exception as e:
                     if isinstance(e, _operror_types):
@@ -88,6 +93,9 @@ def monkeypatch_django() -> None:
                             _log.error("Reconnecting to the database didn't help %s", str(e))
                             del self._in_connecting
                             post_reconnect.send(self.__class__, dbwrapper=self)
+                            # _connection_retries is deliberately not reset here, so further connection attempts fail
+                            # fast instead of hammering a struggling database until one succeeds.
+                            self._dbconn_failing_fast = True
                             raise
                         else:
                             _log.info("Database connection failed. Refreshing...")
@@ -122,6 +130,7 @@ def monkeypatch_django() -> None:
                 else:
                     # connection successful, reset the flag
                     self._connection_retries = 0
+                    self._dbconn_failing_fast = False
                     del self._in_connecting
 
     _log.debug("django_dbconn_retry: monkeypatching BaseDatabaseWrapper")
